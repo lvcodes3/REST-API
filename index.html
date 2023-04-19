@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Single-Page Application</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      .app {
+        margin: 0 auto;
+        width: 100%;
+        height: 100vh;
+      }
+
+      .header {
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      #name-error {
+        color: red;
+      }
+
+      .header-bar {
+        margin: 0 auto;
+        width: 60%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .search-bar {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #first-name {
+        width: 80%;
+        height: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        border: 1px solid black;
+      }
+      #submit-btn {
+        width: 20%;
+        height: 29px;
+        color: white;
+        background-color: green;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+      }
+      #submit-btn:hover {
+        transform: scale(1.05);
+        border: 3px solid darkgreen;
+      }
+
+      #options table {
+        margin: 0 auto;
+        width: 100%;
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      #options table tr {
+        border: 1px solid black;
+        cursor: pointer;
+      }
+      #options table tr:hover {
+        color: green;
+      }
+      #options table td {
+        text-align: left;
+      }
+
+      #results {
+        margin: 0 auto;
+        padding-top: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">
+        <h1>Single-Page Application</h1>
+        <p id="name-error"></p>
+        <div class="header-bar">
+          <div class="search-bar">
+            <input
+              id="first-name"
+              name="first-name"
+              type="text"
+              autocomplete="off"
+              placeholder="Enter a First Name"
+              oninput="getOptions(this.value)"
+            />
+            <button
+              id="submit-btn"
+              type="button"
+              onclick="formSubmitHandler(document.getElementById('first-name').value)"
+            >
+              GET
+            </button>
+          </div>
+          <div id="options"></div>
+        </div>
+      </div>
+      <div id="results">
+        <img
+          id="robot-image"
+          src=""
+          alt="robothash image"
+          style="display: none"
+        />
+        <div id="json-results"></div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      const getOptions = (value) => {
+        // Using XMLHttpRequest to make backend API call
+        if (value) {
+          try {
+            let req = new XMLHttpRequest();
+            req.open("GET", `http://localhost:5000/users/2/${value}`, true);
+            req.setRequestHeader(
+              "Content-type",
+              "application/x-www-form-urlencoded"
+            );
+            req.onreadystatechange = function () {
+              if (req.readyState == 4 && req.status == 200) {
+                if (req.responseText === "User not found.") {
+                  document.getElementById("options").innerHTML = "";
+                } else {
+                  let jsonObj = JSON.parse(req.responseText);
+                  displayOptions(jsonObj);
+                }
+              }
+            };
+            req.send();
+          } catch (err) {
+            console.log(err.message);
+          }
+        } else {
+          document.getElementById("options").innerHTML = "";
+        }
+      };
+
+      const displayOptions = (obj) => {
+        let str = "<table>";
+        str += "<tbody>";
+        for (let i = 0; i < obj.length; i++) {
+          str += `<tr onclick="fillInput('${obj[i].firstname}')"><td>${obj[i].firstname}</td></tr>`;
+        }
+        str += "</tbody>";
+        str += "</table>";
+        document.getElementById("options").innerHTML = str;
+      };
+
+      const fillInput = (value) => {
+        document.getElementById("first-name").value = value;
+        document.getElementById("options").innerHTML = "";
+      };
+
+      const reset = () => {
+        document.getElementById("name-error").innerHTML = "";
+        document.getElementById("options").innerHTML = "";
+        document.getElementById("robot-image").style.display = "none";
+        document.getElementById("json-results").innerHTML = "";
+      };
+
+      const formSubmitHandler = (name) => {
+        // clearing fields
+        reset();
+
+        // input data validation
+        if (!name) {
+          document.getElementById("name-error").innerHTML =
+            "Your first name can not be empty!";
+          return;
+        }
+
+        // Using XMLHttpRequest to make backend API call
+        try {
+          let req = new XMLHttpRequest();
+          req.open("GET", `http://localhost:5000/users/1/${name}`, true);
+          req.setRequestHeader(
+            "Content-type",
+            "application/x-www-form-urlencoded"
+          );
+          req.onreadystatechange = function () {
+            if (req.readyState == 4 && req.status == 200) {
+              if (req.responseText === "User not found.") {
+                document.getElementById(
+                  "name-error"
+                ).innerHTML = `${name} was not found in the db.`;
+              } else {
+                let jsonObj = JSON.parse(req.responseText);
+                displayImage(jsonObj);
+                let jsonText = JSON.stringify(jsonObj, null, "  ");
+                displayJSON(jsonText);
+              }
+            }
+          };
+          req.send();
+        } catch (err) {
+          console.log(err.message);
+        }
+      };
+
+      const displayImage = (obj) => {
+        document.getElementById("robot-image").src = obj.image;
+        document.getElementById("robot-image").style.display = "";
+      };
+
+      const displayJSON = (json) => {
+        // display json
+        let str = "<pre><code>";
+        str += json;
+        str += "</code></pre>";
+        document.getElementById("json-results").innerHTML = str;
+      };
+
+      // event listener for enter key
+      document
+        .getElementById("first-name")
+        .addEventListener("keyup", function (event) {
+          if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("submit-btn").click();
+          }
+        });
+    </script>
+  </body>
+</html>
