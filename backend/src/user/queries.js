@@ -26,4 +26,12 @@ const deleteUserById = `DELETE FROM users WHERE id = $1`;
 module.exports = {
   getUserByFirstName,
   getUsersByFirstLetter,
+  /*
+  getAllUsers,
+  getUserById,
+  addUser,
+  getUserId,
+  updateUserById,
+  deleteUserById,
+  */
 };

@@ -215,4 +215,12 @@ const deleteUserById = async (req, res) => {
 module.exports = {
   getUserByFirstName,
   getUsersByFirstLetter,
+  /*
+  addUsers,
+  getAllUsers,
+  getUserById,
+  addUser,
+  updateUserById,
+  deleteUserById,
+  */
 };
