@@ -35,7 +35,7 @@
         align-items: center;
       }
 
-      #first-name {
+      #fn {
         width: 80%;
         height: 25px;
         font-size: 16px;
@@ -91,17 +91,16 @@
         <div class="header-bar">
           <div class="search-bar">
             <input
-              id="first-name"
-              name="first-name"
+              id="fn"
+              name="fn"
               type="text"
-              autocomplete="off"
               placeholder="Enter a First Name"
               oninput="getOptions(this.value)"
             />
             <button
               id="submit-btn"
               type="button"
-              onclick="formSubmitHandler(document.getElementById('first-name').value)"
+              onclick="formSubmitHandler(document.getElementById('fn').value)"
             >
               GET
             </button>
@@ -162,7 +161,7 @@
       };
 
       const fillInput = (value) => {
-        document.getElementById("first-name").value = value;
+        document.getElementById("fn").value = value;
         document.getElementById("options").innerHTML = "";
       };
 
@@ -225,15 +224,17 @@
         document.getElementById("json-results").innerHTML = str;
       };
 
+      // disabling suggestions on input
+      const inputElement = document.getElementById("fn");
+      inputElement.setAttribute("autocomplete", "off");
+
       // event listener for enter key
-      document
-        .getElementById("first-name")
-        .addEventListener("keyup", function (event) {
-          if (event.keyCode === 13) {
-            event.preventDefault();
-            document.getElementById("submit-btn").click();
-          }
-        });
+      document.getElementById("fn").addEventListener("keyup", function (event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          document.getElementById("submit-btn").click();
+        }
+      });
     </script>
   </body>
 </html>
